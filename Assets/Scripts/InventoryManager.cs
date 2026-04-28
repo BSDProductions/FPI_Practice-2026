@@ -35,7 +35,7 @@ public class InventoryManager : MonoBehaviour
             slotContainer = GameObject.Find("SlotContainer")?.transform;
             if (slotContainer == null)
             {
-                Debug.LogErorr("Could not find SlotContainer in scene!");
+                Debug.LogError("Could not find SlotContainer in scene!");
                 return;
             }
         }

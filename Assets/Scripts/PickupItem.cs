@@ -3,7 +3,8 @@ using UnityEngine;
 public class PickupItem : MonoBehaviour
 {
     [Header("Pickup Settings")]
-    public ItemData item;
+    // Changed to 'item' so InventoryManager can find it automatically
+    public ItemData item; 
     public float pickupRadius = 3f;
     public KeyCode interactKey = KeyCode.E;
 
@@ -32,11 +33,13 @@ public class PickupItem : MonoBehaviour
             return;
         }
 
+        // --- OFFSET FIX ---
+        // If this is the Red Key, the 'transform.position' is at Y: -293.
+        // We use the meshRenderer.bounds.center to get the actual visual location of the key.
         Vector3 actualPosition = (meshRenderer != null) ? meshRenderer.bounds.center : transform.position;
 
         float distance = Vector3.Distance(player.position, actualPosition);
         isInRange = distance <= pickupRadius;
-
 
         if (isInRange && Input.GetKeyDown(interactKey))
         {
@@ -48,21 +51,23 @@ public class PickupItem : MonoBehaviour
     {
         if (item == null)
         {
-            Debug.LogErorr($"Pickup failed: {gameObject.name} has no ItemData assigned!");
+            Debug.LogError($"Pickup failed: {gameObject.name} has no ItemData assigned!");
             return;
         }
 
         if (InventoryManager.Instance == null)
         {
-            Debug.LogErorr($"Pickup failed: No InventoryManager isntance found!");
+            Debug.LogError($"Pickup failed: No InventoryManager instance found!");
             return;
         }
 
+        // Check if inventory has space before picking up
         if (InventoryManager.Instance.items.Count < InventoryManager.Instance.maxSlots)
         {
-            Debug.Log($"Player picked up: {item.itemName}");
+            Debug.Log($"✅ Player picked up: {item.itemName}");
             InventoryManager.Instance.AddItem(item);
-
+            
+            // Destroy instead of SetActive(false) to keep the scene clean
             Destroy(gameObject);
         }
         else
@@ -74,7 +79,8 @@ public class PickupItem : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
+        // Gizmos will now show around the actual mesh center if available
         Vector3 debugPos = (meshRenderer != null) ? meshRenderer.bounds.center : transform.position;
-        Gizmos.DrawWireSphere(debugPos, pickupRaidus);
+        Gizmos.DrawWireSphere(debugPos, pickupRadius);
     }
 }
